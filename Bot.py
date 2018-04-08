@@ -12,26 +12,30 @@ updater = Updater(token='597548004:AAHRnEhZ8nuFUnxCBV9XKcPHBaHcU-lbOW4')
 connection = sqlite3.connect('userDetails.db',check_same_thread=False)
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',level=logging.INFO)
 
+#Function to start the bot,initiated on /start command
 def start(bot,update):
     bot.send_message(chat_id=update.message.chat_id, text='Hi, I am pizza order bot')
 
-
+#Function to ask user its details to register,initiated on /register command
 def register(bot,update):
     bot.send_message(chat_id=update.message.chat_id,text='Enter your details in the following format : '
                                                          'Name, Address, Phone number, Credit Card number')
+
 
 def database(update,user_id,customer_name,address,phone_number,creditcard_number):
     print(user_id,customer_name,address,phone_number,creditcard_number)
     connection.execute('''CREATE TABLE IF NOT EXISTS userdetails(user_id int,customer_name text,address text,phone_number int,creditcard_details int )''')
     connection.execute("INSERT INTO userdetails VALUES (?,?,?,?,?)",(user_id,customer_name,address,phone_number,creditcard_number))
     connection.commit()
-
+    
+#Function to save user details in the database
 def saveuserDetails(bot,update):
     print("INSIDE GETUSER ID FUNCTION")
     user_id=update.message.from_user.id
     customer_name,address,phone_number,creditcard_number=update.message.text.split(',')
     database(update,user_id,customer_name,address,phone_number,creditcard_number)
 
+#Function to check the userdetails initiated by user on /checkdetails command
 def checkDetails(bot,update):
     value = update.message.from_user.id
     print("VALUE : ", value)
@@ -44,6 +48,7 @@ def checkDetails(bot,update):
     list=tabulate(table,tablefmt="fancy_grid")
     bot.send_message(chat_id=update.message.chat_id,text=list)
 
+'''
 def showuserDetails(bot,update):
     value=update.message.from_user.id
     for row in connection.execute("SELECT *from userdetails WHERE user_id=?",(value,)):
@@ -51,6 +56,7 @@ def showuserDetails(bot,update):
         user_id, customer_name, address, phone_number, creditcard_number=row
     bot.send_message(chat_id=update.message.chat_id,text=["Customer Name : ",customer_name,"Address : ",address,"PhoneNumber : ",phone_number,
                                                           "Credit Card Details : ",creditcard_number])
+'''
 
 #FUNCTION FOR ORDERING PIZZA
 def pizza(bot,update):
@@ -81,7 +87,7 @@ def main():
     updater.dispatcher.add_handler((MessageHandler(Filters.text, saveuserDetails)))
     updater.dispatcher.add_handler(CommandHandler('checkdetails',checkDetails))
     updater.dispatcher.add_handler(CommandHandler('order',pizza))
-    updater.dispatcher.add_handler(CommandHandler('userdetails',showuserDetails))
+   #updater.dispatcher.add_handler(CommandHandler('userdetails',showuserDetails))
     updater.dispatcher.add_handler((CallbackQueryHandler(button)))
     updater.start_polling()
 
